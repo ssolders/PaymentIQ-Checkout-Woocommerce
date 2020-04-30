@@ -1,0 +1,19 @@
+{
+    "name": "solders/paymentiq-checkout",
+    "description": "PaymentIQ Checkout for Woocommerce",
+    "type": "project",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "Simon Solders",
+            "email": "simon.solders@devcode.se"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Inc\\": "./inc"
+        }
+    }
+}

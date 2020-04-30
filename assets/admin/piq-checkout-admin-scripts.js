@@ -1,0 +1,1 @@
+console.log('PIQ CHECKOUT ADMIN SCRIPT INIT')
