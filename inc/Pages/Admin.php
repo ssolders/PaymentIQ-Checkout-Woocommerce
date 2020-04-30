@@ -7,20 +7,39 @@
  * @PLUGIN_PATH -> Base path of the plugin (root folder)
  */
 
- namespace Inc\Pages;
+namespace Inc\Pages;
 
- class Admin {
-  function __construct() {}
+use \Inc\Base\BaseController;
+use \Inc\Api\SettingsApi;
+
+class Admin extends BaseController {
+  
+  public $settings;
 
   public function register() {
-    add_action( 'admin_menu', array( $this, 'addAdminPage' ) );
-  }
+    // for some reason, we can't use __contruct so we create a new SettingsApi in the register() instead
+    $this->settings = new SettingsApi();
 
-  public function addAdminPage () {
-    add_menu_page( 'PIQCheckout',  'PIQ Checkout', 'manage_options', 'PIQCheckoutWoocommerce-plugin', array( $this, 'renderSettingsPage' ), 'dashicons-admin-settings', 110 );
+    $pages = [
+      [
+        'page_title' => 'PIQCheckout',
+        'menu_title' => 'PIQ Checkout',
+        'capability' => 'manage_options',
+        'menu_slug' => 'PIQCheckoutWoocommerce-plugin',
+        'callback' => function () { echo '<h1>Test plugin header</h1>'; },
+        'icon_url' => 'dashicons-admin-settings',
+        'position' => 110
+      ],
+      [
+        'page_title' => 'PIQCheckout2',
+        'menu_title' => 'PIQ Checkout2',
+        'capability' => 'manage_options',
+        'menu_slug' => 'PIQCheckoutWoocommerce-plugin',
+        'callback' => function () { echo '<h1>Test plugin header2</h1>'; },
+        'icon_url' => 'dashicons-admin-settings',
+        'position' => 110
+      ]
+    ];
+    $this->settings->addPages( $pages )->register();
   }
-
-  public function renderSettingsPage () {
-    require_once PLUGIN_PATH . 'templates/admin/settings.php';
-  }
- }
+}

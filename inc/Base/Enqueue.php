@@ -12,7 +12,9 @@
 
  namespace Inc\Base;
 
- class Enqueue {
+ use \Inc\Base\BaseController;
+
+ class Enqueue extends BaseController {
   function __construct() {}
 
   public function register() {
@@ -21,12 +23,12 @@
   }
 
   public function enqueueAdminAssets () {
-    wp_enqueue_style( 'piqCheckoutAdminStyle', PLUGIN_URL . 'assets/admin/piq-checkout-admin-styles.css' );
-    wp_enqueue_script( 'piqCheckoutAdminScript', PLUGIN_URL . 'assets/admin/piq-checkout-admin-scripts.js' );
+    wp_enqueue_style( 'piqCheckoutAdminStyle', $this->plugin_url . 'assets/admin/piq-checkout-admin-styles.css' );
+    wp_enqueue_script( 'piqCheckoutAdminScript', $this->plugin_url . 'assets/admin/piq-checkout-admin-scripts.js' );
   }
   
   function enqueueAssets () {
-    wp_enqueue_style( 'piqCheckoutScript', PLUGIN_URL . 'assets/piq-checkout-styles.css' );
-    wp_enqueue_script( 'piqCheckoutScript', PLUGIN_URL . 'assets/piq-checkout-scripts.js' );
+    wp_enqueue_style( 'piqCheckoutScript', $this->plugin_url . 'assets/piq-checkout-styles.css' );
+    wp_enqueue_script( 'piqCheckoutScript', $this->plugin_url . 'assets/piq-checkout-scripts.js' );
   }
  }

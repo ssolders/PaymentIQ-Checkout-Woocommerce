@@ -27,8 +27,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
- // If not inside wordpress - die right away
- defined( 'ABSPATH' ) or die( 'Hey you can\t access this file, you silly human');
+// If not inside wordpress - die right away
+defined( 'ABSPATH' ) or die( 'Hey you can\t access this file, you silly human');
+
+define( 'WP_DEBUG', true );
 
 /* Using composer - autoload for simpler importing of classes */
 if ( file_exists(  dirname( __FILE__ ) . '/vendor/autoload.php' ) ) {
@@ -39,33 +41,22 @@ if ( file_exists(  dirname( __FILE__ ) . '/vendor/autoload.php' ) ) {
    A Wordpress plugin has an activation & deactivation hook - we can call functions/classes to be triggered
    Need to set these up to start with
 */
-use Inc\Base\Activate;
-use Inc\Base\Deactivate;
 function activatePIQCheckout () {
-  Activate::activate(); // inc/Base/Activate.php
+  Inc\Base\Activate::activate(); // inc/Base/Activate.php
 }
-function deactivatePIQCheckout () {
-  Deactivate::deactivate(); // inc/Base/Deactivate.php
-}
-
 register_activation_hook( __FILE__, 'activatePIQCheckout' );
+
+function deactivatePIQCheckout () {
+  Inc\Base\Deactivate::deactivate(); // inc/Base/Deactivate.php
+}
 register_deactivation_hook( __FILE__, 'deactivatePIQCheckout' );
+
 
 /* Hook for when plugins have loaded -> Our way of knowing when to kick things of
 */
 add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
 
 function initPIQCheckout () {
-  /*  REGISTER GLOBAL VARIABLES
-  */
-  /*  Global variable for keeping track of the root folder when importing classes */
-  define ( 'PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
-  /*  Global variable for keeping track of the baseUrl of the plugin when importing assets */
-  define ( 'PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-  /*  Global variable for keeping track of the plugin name (wordpress plugins' name is unique and is used for referencing this unique plugin ) */
-  define ( 'PLUGIN', plugin_basename( __FILE__ ) );
-
-
   /*  Initialize PaymentIQ Checkout and extend it with WC_Payment_Gateway
       After init, call the register function which is turn calls the Init class.
       Check if our Init class exists (/Inc/Init.php)
