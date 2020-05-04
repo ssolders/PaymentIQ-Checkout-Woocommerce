@@ -1,1 +1,0 @@
-console.log('PIQ CHECKOUT SCRIPT INIT')

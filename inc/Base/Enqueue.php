@@ -23,12 +23,12 @@
   }
 
   public function enqueueAdminAssets () {
-    wp_enqueue_style( 'piqCheckoutAdminStyle', $this->plugin_url . 'assets/admin/piq-checkout-admin-styles.css' );
-    wp_enqueue_script( 'piqCheckoutAdminScript', $this->plugin_url . 'assets/admin/piq-checkout-admin-scripts.js' );
+    wp_enqueue_style( 'piqCheckoutAdminStyle', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/styles/piq-checkout-admin-styles.css' );
+    wp_enqueue_script( 'piqCheckoutAdminScript', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/scripts/piq-checkout-admin.js' );
   }
   
   function enqueueAssets () {
-    wp_enqueue_style( 'piqCheckoutScript', $this->plugin_url . 'assets/piq-checkout-styles.css' );
-    wp_enqueue_script( 'piqCheckoutScript', $this->plugin_url . 'assets/piq-checkout-scripts.js' );
+    wp_enqueue_style( 'piqCheckoutScript', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/styles/piq-checkout-styles.css' );
+    wp_enqueue_script( 'piqCheckoutScript', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/scripts/piq-checkout-scripts.js' );
   }
  }
