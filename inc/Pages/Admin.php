@@ -15,12 +15,13 @@ use \Inc\Api\SettingsApi;
 class Admin extends BaseController {
   
   public $settings;
+  public $pages;
 
-  public function register() {
-    // for some reason, we can't use __contruct so we create a new SettingsApi in the register() instead
+  public function __construct() {
     $this->settings = new SettingsApi();
 
-    $pages = [
+    // Add another array item to add a new admin page
+    $this->pages = [
       [
         'page_title' => 'PIQCheckout',
         'menu_title' => 'PIQ Checkout',
@@ -29,17 +30,11 @@ class Admin extends BaseController {
         'callback' => function () { echo '<h1>Test plugin header</h1>'; },
         'icon_url' => 'dashicons-admin-settings',
         'position' => 110
-      ],
-      [
-        'page_title' => 'PIQCheckout2',
-        'menu_title' => 'PIQ Checkout2',
-        'capability' => 'manage_options',
-        'menu_slug' => 'PIQCheckoutWoocommerce-plugin',
-        'callback' => function () { echo '<h1>Test plugin header2</h1>'; },
-        'icon_url' => 'dashicons-admin-settings',
-        'position' => 110
       ]
     ];
-    $this->settings->addPages( $pages )->register();
+  }
+
+  public function register() {
+    $this->settings->addPages( $this->pages )->register();
   }
 }

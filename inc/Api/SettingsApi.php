@@ -9,6 +9,10 @@ namespace Inc\Api;
 class SettingsApi {
   public $adminPages = array();
 
+  public function __contruct() {
+    
+  }
+
   public function register () {
     if ( ! empty($this->adminPages) ) {
       add_action( 'admin_menu', array( $this, 'addAdminMenu' ) );
