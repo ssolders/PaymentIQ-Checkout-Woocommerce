@@ -29,6 +29,6 @@
   
   function enqueueAssets () {
     wp_enqueue_style( 'piqCheckoutScript', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/styles/piq-checkout-styles.css' );
-    wp_enqueue_script( 'piqCheckoutScript', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/scripts/piq-checkout-scripts.js' );
+    wp_enqueue_script( 'piqCheckoutScript', $this->plugin_url . '/wp-content/plugins/paymentiq-checkout/assets/scripts/piq-checkout-client.js' );
   }
  }

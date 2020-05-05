@@ -29,6 +29,9 @@
       "@babel/preset-env"
     ]
   },
+  "dependencies": {
+    "paymentiq-cashier-bootstrapper": "^1.0.19"
+  },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.9.6",
