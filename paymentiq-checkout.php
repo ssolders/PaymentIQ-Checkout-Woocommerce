@@ -50,7 +50,6 @@ function deactivatePIQCheckout () {
 register_deactivation_hook( __FILE__, 'deactivatePIQCheckout' );
 
 define( 'PIQ_WC_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) );
-define( 'PIQ_MERCHANT_ID', '' );
 
 /* Hook for when plugins have loaded -> Our way of knowing when to kick things of
 */
@@ -69,8 +68,6 @@ function initPIQCheckout () {
   */
 
   class PIQCheckoutWoocommerce extends WC_Payment_Gateway {
-
-    public $templates;
 
     public function __construct () {
       $this->id = 'paymentiq-checkout';

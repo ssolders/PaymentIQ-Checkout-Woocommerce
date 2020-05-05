@@ -26,6 +26,7 @@ class Admin extends BaseController {
   public $piqCheckoutSlug = 'PIQCheckoutWoocommerce-plugin';
 
   public function register() {
+    return;
     $this->settings = new SettingsApi();
     
     $this->callbacks = new AdminCallbacks();

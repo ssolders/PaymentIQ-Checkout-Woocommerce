@@ -24,12 +24,6 @@ wc_print_notices();
 
 <form name="checkout" class="checkout woocommerce-checkout">
 	<div id="piq-checkout-wrapper">
-		<h1>MID</h1>
-		<h1>
-			<?php
-				echo $test;
-			?>
-		</h1>
 		<div id="piq-checkout"></div>
 	</div>
   <script>

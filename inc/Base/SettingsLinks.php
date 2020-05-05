@@ -19,7 +19,7 @@ class SettingsLinks extends BaseController {
   }
 
   public function settingsLink ( $links ) {
-    $settingsLink = '<a href="admin.php?page=PIQCheckoutWoocommerce-plugin">Settings</a>';
+    $settingsLink = "<a href='admin.php?page=wc-settings&tab=checkout&section=paymentiq-checkout'>Settings</a>";
     array_push( $links, $settingsLink );
     return $links;
   }
