@@ -7,9 +7,15 @@
  * @package paymentiq-checkout
  */
 
+include_once PIQ_WC_PLUGIN_PATH . '/inc/Utils.php';
+
 wc_print_notices();
 
-// do_action( 'kco_wc_before_checkout_form' );
+do_action( 'piq_co_wc_before_checkout_form' );
+
+if ( ! shouldSetupCheckout ()) {
+	return;
+}
 
 // If checkout registration is disabled and not logged in, the user cannot checkout.
 // if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() ) {
@@ -18,16 +24,21 @@ wc_print_notices();
 // }
 ?>
 
-<!-- <div id="piq-order-review">
-	<?php woocommerce_order_review(); ?>
-</div> -->
-
 <form name="checkout" class="checkout woocommerce-checkout">
 	<div id="piq-checkout-wrapper">
 		<div id="piq-checkout"></div>
+		<?php woocommerce_order_review(); ?>
 	</div>
   <script>
-		var event = new Event('setupPIQCheckout');
-		window.dispatchEvent(event)
+		// We let the javascript know that it's time to setup the checkout
+		// We pass along the configured settings in payload
+		window.postMessage({
+			eventType: 'setupPIQCheckout',
+			payload: {
+				merchantId: <?php piqCheckoutMerchantId(); ?>,
+				amount: <?php piqCheckoutTotalAmount(); ?>,
+				orderId: <?php piqCheckoutOrderId(); ?>
+			}
+		}, '*')
   </script>
 </form>

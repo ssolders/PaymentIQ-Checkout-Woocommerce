@@ -12,8 +12,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Echoes Checkout iframe setup
  */
-function piqCheckoutSetup() {
-	$klarna_order = kco_create_or_update_order();
-	do_action( 'kco_wc_show_snippet', $klarna_order );
-	echo $klarna_order['html_snippet'];
+
+function shouldSetupCheckout() {
+	if ( null !== PIQ_MID && null !== PIQ_TOTAL_AMOUNT && null !== PIQ_TOTAL_AMOUNT ) {
+		return true;
+	} else {
+		return false;	
+	}
+}
+
+function piqCheckoutMerchantId() {
+	echo PIQ_MID;
+}
+
+function piqCheckoutTotalAmount() {
+	echo PIQ_TOTAL_AMOUNT;
+}
+
+function piqCheckoutOrderId() {
+	echo PIQ_ORDER_ID;
 }

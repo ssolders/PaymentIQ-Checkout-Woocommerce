@@ -7,15 +7,19 @@ window.addEventListener('load', function () {
 });
 
 window.addEventListener('message', function (e) {
+  console.log(e.data)
   if (e.data && e.data.eventType) {
-    const eventType = e.data.eventType
-    if (eventType === 'APP_SET_HEIGHT') {
-      // document.getElementById('cashierIframe').style.height = e.data.payload.height + 'px'
+    const { eventType, payload } = e.data
+    if (eventType === 'setupPIQCheckout') {
+      setupCheckout(payload)
     }
   }
 })
 
 window.addEventListener('setupPIQCheckout', function (e) {
+})
+
+function setupCheckout (payload) {
   const lookupConfig = {
     source: 'mock',
     country: 'sweden',
@@ -23,11 +27,9 @@ window.addEventListener('setupPIQCheckout', function (e) {
     identifyProvider: 'bankId',
     environment: 'production'
   }
-  new _PaymentIQCheckout('#piq-checkout',
-  {
-    "environment": "development",
+  const config = {
+    "environment": "test",
     "userId": "PayTestSE",
-    "merchantId": '1014',
     "amount": "499",
     "showAccounts": "inline",
     "globalSubmit": true,
@@ -44,8 +46,10 @@ window.addEventListener('setupPIQCheckout', function (e) {
       "buttons": {
         "color": "#eb0000"
       }
-    }
-  },
+    },
+    ...payload
+  }
+  new _PaymentIQCheckout('#piq-checkout', config,
   (api) => {
     api.on({
       cashierInitLoad: () => console.log('Cashier init load'),
@@ -61,5 +65,6 @@ window.addEventListener('setupPIQCheckout', function (e) {
     });
 
   }
-)
-});
+)  
+
+}
