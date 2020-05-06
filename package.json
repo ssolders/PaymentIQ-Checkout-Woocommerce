@@ -30,7 +30,7 @@
     ]
   },
   "dependencies": {
-    "paymentiq-cashier-bootstrapper": "^1.0.19"
+    "paymentiq-cashier-bootstrapper": "1.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",

@@ -8,34 +8,58 @@ window.addEventListener('load', function () {
 
 window.addEventListener('message', function (e) {
   if (e.data && e.data.eventType) {
-    console.log(e.data);
-    console.log(e.data.payload);
+    const eventType = e.data.eventType
+    if (eventType === 'APP_SET_HEIGHT') {
+      // document.getElementById('cashierIframe').style.height = e.data.payload.height + 'px'
+    }
   }
 })
 
 window.addEventListener('setupPIQCheckout', function (e) {
+  const lookupConfig = {
+    source: 'mock',
+    country: 'sweden',
+    //identifyFields: ['email', 'zip']
+    identifyProvider: 'bankId',
+    environment: 'production'
+  }
   new _PaymentIQCheckout('#piq-checkout',
   {
-    merchantId: '1014',
-    userId: 'PayTestSE',
-    amount: 1500,
+    "environment": "development",
+    "userId": "PayTestSE",
+    "merchantId": '1014',
+    "amount": "499",
+    "showAccounts": "inline",
+    "globalSubmit": true,
+    "showListHeaders": true,
+    "showAccounts": "false",
+    "mode": "ecommerce",
+    "locale": "sv_SE",
+    "font": 'custom,santander,santander',
+    "containerHeight": 'auto',
     lookupConfig: {
-      source: 'mock',
-      country: 'sweden',
-      identifyFields: ['email', 'zip']
-      // identifyProvider: 'bankId'
+      ...lookupConfig
     },
-    showAccounts: 'inline',
-    mode: 'ecommerce',
-    showListHeaders: true,
-    globalSubmit: 'true',
-    font: 'custom, santander, santander',
-    sessionId: '66',
-    environment: 'test', // if not set, defaults to production
-    method: 'deposit' // if not set, defaults to deposit
+    "theme": {
+      "buttons": {
+        "color": "#eb0000"
+      }
+    }
   },
   (api) => {
-     console.log('Cashier intialized and ready to take down the empire')
+    api.on({
+      cashierInitLoad: () => console.log('Cashier init load'),
+      update: data => console.log('The passed in data was set', data),
+      success: data => console.log('Transaction was completed successfully', data),
+      failure: data => console.log('Transaction failed', data),
+      isLoading: data => console.log('Data is loading', data),
+      doneLoading: data => console.log('Data has been successfully downloaded', data),
+      newProviderWindow: data => console.log('A new window / iframe has opened', data),
+      paymentMethodSelect: data => console.log('Payment method was selected', data),
+      paymentMethodPageEntered: data => console.log('New payment method page was opened', data),
+      navigate: data => console.log('Path navigation triggered', data)
+    });
+
   }
 )
 });
