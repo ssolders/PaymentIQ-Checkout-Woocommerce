@@ -12,7 +12,7 @@
 namespace Inc\Base;
 
 class WooCommercePIQCheckoutSetup {
-  public function registerSupports () {
+  static function registerSupports () {
     return array(
         'products',
         'refunds',
@@ -27,7 +27,7 @@ class WooCommercePIQCheckoutSetup {
       );
   }
   
-  public function registerFormFields () {
+  static function registerFormFields () {
     return array(
       'enabled' => array(
           'title' => 'Activate module',

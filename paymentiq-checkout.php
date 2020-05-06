@@ -79,8 +79,6 @@ function initPIQCheckout () {
       $this->PIQ_TOTAL_AMOUNT = null;
       $this->PIQ_ORDER_ID = null;
       
-      add_action( 'piq_co_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-
       $this->supports = Inc\Base\WooCommercePIQCheckoutSetup::registerSupports();
 
       $this->form_fields = Inc\Base\WooCommercePIQCheckoutSetup::registerFormFields();
@@ -141,7 +139,8 @@ function initPIQCheckout () {
     public function initHooks() {
       // Actions!
       add_action( 'woocommerce_api_' . strtolower( get_class() ), array( $this, 'paymentiqCheckoutCallback' ) );
-      add_action('woocommerce_init', 'getWC_order_details');
+      add_action('woocommerce_init', array( $this, 'getWC_order_details' ) );
+      add_action( 'piq_co_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
 
       if( is_admin() ) {
         /* Saves changes when editing in PIQ Checkout admin (WooCommerce->Settings->Payments->PaymentIQ Checkout)  */
@@ -158,10 +157,18 @@ function initPIQCheckout () {
       // //Subscriptions
       // add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
       // add_action('woocommerce_subscription_cancelled_' . $this->id, array($this, 'subscription_cancellation'));
-  }
+    }
+
+    public function updateOrderStatus ( $status ) {
+      $order = wc_get_order( $this->PIQ_ORDER_ID );
+      if (!empty($order)) {
+          $order->update_status( 'completed' );
+      }
+    }
+
 
     public function getWC_order_details( $order_id ) {
-      echo 'HELLO WORLD';
+      
     }
 
     public function paymentiqCheckoutCallback () {

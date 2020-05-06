@@ -10,8 +10,11 @@ window.addEventListener('message', function (e) {
   console.log(e.data)
   if (e.data && e.data.eventType) {
     const { eventType, payload } = e.data
-    if (eventType === 'setupPIQCheckout') {
-      setupCheckout(payload)
+    switch (eventType) {
+      case '::wooCommerceSetupPIQCheckout':
+        return setupCheckout(payload)
+      default: 
+        return
     }
   }
 })
@@ -54,7 +57,7 @@ function setupCheckout (payload) {
     api.on({
       cashierInitLoad: () => console.log('Cashier init load'),
       update: data => console.log('The passed in data was set', data),
-      success: data => console.log('Transaction was completed successfully', data),
+      success: data => notifyOrderStatus('success', data),
       failure: data => console.log('Transaction failed', data),
       isLoading: data => console.log('Data is loading', data),
       doneLoading: data => console.log('Data has been successfully downloaded', data),
@@ -63,8 +66,20 @@ function setupCheckout (payload) {
       paymentMethodPageEntered: data => console.log('New payment method page was opened', data),
       navigate: data => console.log('Path navigation triggered', data)
     });
-
   }
 )  
+}
 
+function notifyOrderStatus (status, data) {
+  let payload = {}
+  switch (status) {
+    case 'success':
+      payload = {
+        eventType: '::wooCommercePaymentSuccess'
+      }
+      break
+    default:
+      return
+  }
+  window.postMessage(payload, '*')
 }

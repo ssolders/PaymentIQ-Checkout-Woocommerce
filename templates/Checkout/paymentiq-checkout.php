@@ -13,6 +13,7 @@ wc_print_notices();
 
 do_action( 'piq_co_wc_before_checkout_form' );
 
+// Setup when we have the necessary things (merchantId, orderId and amount)
 if ( ! shouldSetupCheckout ()) {
 	return;
 }
@@ -22,6 +23,7 @@ if ( ! shouldSetupCheckout ()) {
 // 	echo esc_html( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
 // 	return;
 // }
+/* <?php do_action( 'piq_co_update_order_status', 'success' ); ?> */
 ?>
 
 <form name="checkout" class="checkout woocommerce-checkout">
@@ -33,12 +35,25 @@ if ( ! shouldSetupCheckout ()) {
 		// We let the javascript know that it's time to setup the checkout
 		// We pass along the configured settings in payload
 		window.postMessage({
-			eventType: 'setupPIQCheckout',
+			eventType: '::wooCommerceSetupPIQCheckout',
 			payload: {
-				merchantId: <?php piqCheckoutMerchantId(); ?>,
-				amount: <?php piqCheckoutTotalAmount(); ?>,
-				orderId: <?php piqCheckoutOrderId(); ?>
+				merchantId: <?php getPiqMerchantId(); ?>,
+				amount: <?php getPiqTotalAmount(); ?>,
+				orderId: <?php getOrderId(); ?>
 			}
 		}, '*')
+
+		window.addEventListener('message', function (e) {
+			if (e.data && e.data.eventType) {
+				const { eventType, payload } = e.data
+				switch (eventType) {
+					case '::wooCommercePaymentSuccess':
+						console.log('GOT SUCCESS MESSAGE')
+						break
+					default:
+						return
+				}	
+			}
+		})
   </script>
 </form>

@@ -21,14 +21,20 @@ function shouldSetupCheckout() {
 	}
 }
 
-function piqCheckoutMerchantId() {
+/* Getter functions for variables defined in paymentiq-checkout.php plugin main class  */
+function getPiqMerchantId() {
 	echo PIQ_MID;
 }
 
-function piqCheckoutTotalAmount() {
+function getPiqTotalAmount() {
 	echo PIQ_TOTAL_AMOUNT;
 }
 
-function piqCheckoutOrderId() {
+function getOrderId() {
 	echo PIQ_ORDER_ID;
+}
+
+function updateOrderStatus ( $status ) {
+  // call an action hook that main class reacts to
+  do_action( 'piq_co_update_order_status', $status );
 }
