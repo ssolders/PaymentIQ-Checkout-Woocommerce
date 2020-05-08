@@ -19,32 +19,30 @@ function piq_wc_show_checkout () {
 
 function piq_create_or_update_order( $order_id = null ) {
 	// Need to calculate these here, because WooCommerce hasn't done it yet.
-	WC()->cart->calculate_fees();
-	WC()->cart->calculate_shipping();
-	WC()->cart->calculate_totals();
-	// if ( WC()->session->get( 'kco_wc_order_id' ) ) { // Check if we have an order id.
-	// 	// Try to update the order, if it fails try to create new order.
-	// 	$klarna_order = KCO_WC()->api->update_klarna_order( WC()->session->get( 'kco_wc_order_id' ) );
-	// 	if ( ! $klarna_order ) {
-	// 		// If update order failed try to create new order.
-	// 		$klarna_order = KCO_WC()->api->create_klarna_order();
-	// 		if ( ! $klarna_order ) {
-	// 			// If failed then bail.
-	// 			return;
-	// 		}
-	// 		WC()->session->set( 'kco_wc_order_id', $klarna_order['order_id'] );
-	// 		return $klarna_order;
-	// 	}
-	// 	return $klarna_order;
-	// } else {
-	// 	// Create new order, since we dont have one.
-	// 	$klarna_order = KCO_WC()->api->create_klarna_order();
-	// 	if ( ! $klarna_order ) {
-	// 		return;
-	// 	}
-	// 	WC()->session->set( 'kco_wc_order_id', $klarna_order['order_id'] );
-	// 	return $klarna_order;
-	// }
+	
+	$available_gateways = WC()->payment_gateways->payment_gateways();
+	$payment_method     = $available_gateways['paymentiq-checkout'];
+
+	$manualOrder = array(
+		'status' => 'pending',
+		'payment_method' => $payment_method->id,
+		'billing_email' => ''
+	);
+
+	$cart = WC()->cart;
+	$checkout = WC()->checkout();
+	$order_id = $checkout->create_order($manualOrder);
+	$order = wc_get_order( $order_id );
+	update_post_meta($order_id, '_customer_user', get_current_user_id());
+	$totalAmount = $order->calculate_totals();
+
+	$piqClass = PIQ_CHECKOUT_WC();
+	PIQ_CHECKOUT_WC()->PIQ_TOTAL_AMOUNT = $totalAmount;
+	PIQ_CHECKOUT_WC()->PIQ_ORDER_ID = $order_id;
+	$piqClass = PIQ_CHECKOUT_WC();
+	
+	do_action( 'woocommerce_checkout_create_order', $order, array() );
+	do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
 }
 
 function shouldSetupCheckout() {
@@ -61,11 +59,11 @@ function getPiqMerchantId() {
 }
 
 function getPiqTotalAmount() {
-	echo PIQ_TOTAL_AMOUNT;
+	echo PIQ_CHECKOUT_WC()->PIQ_TOTAL_AMOUNT;
 }
 
 function getOrderId() {
-	echo PIQ_ORDER_ID;
+	echo PIQ_CHECKOUT_WC()->PIQ_ORDER_ID;
 }
 
 function updateOrderStatus ( $status ) {

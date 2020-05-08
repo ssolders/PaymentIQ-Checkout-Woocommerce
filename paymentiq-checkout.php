@@ -60,6 +60,8 @@ if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', g
   add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
 }
 
+include_once PIQ_WC_PLUGIN_PATH . '/inc/Utils.php';
+
 function initPIQCheckout () {
   /*  Initialize PaymentIQ Checkout and extend it with WC_Payment_Gateway
       After init, call the register function which is turn calls the Init class.
@@ -68,6 +70,13 @@ function initPIQCheckout () {
   */
 
   class PIQCheckoutWoocommerce extends WC_Payment_Gateway {
+
+    /**
+		 * The instance of this class
+		 *
+		 * @var $instance
+		 */
+		protected static $instance;
 
     public function __construct () {
       $this->id = 'paymentiq-checkout';
@@ -89,6 +98,14 @@ function initPIQCheckout () {
       // Initilize PaymentIQ Settings
       $this->initCheckoutSettings();
     }
+
+    public static function get_instance() {
+			if ( null === self::$instance ) {
+				self::$instance = new self();
+			}
+
+			return self::$instance;
+		}
     
     
     function register () {
@@ -105,20 +122,17 @@ function initPIQCheckout () {
     */
     public function overrideTemplate( $template, $template_name ) {
       // $piqCheckoutTemplate = require_once( "./templates/Admin/settings.php" );
-      // echo $template_name;
       switch ($template_name) {
-        case 'checkout/payment-method.php':
-          return '';
-        case 'checkout/form-checkout.php':
-          $cart = WC()->cart;
-          $checkout = WC()->checkout();
-          $order_id = $checkout->create_order([]);
-          $order = wc_get_order( $order_id );
+        case 'checkout/form-billing.php':
+          // $cart = WC()->cart;
+          // $checkout = WC()->checkout();
+          // $order_id = $checkout->create_order([]);
+          // $order = wc_get_order( $order_id );
           
-          $this->PIQ_TOTAL_AMOUNT = $order->calculate_totals();
-          $this->PIQ_ORDER_ID = $order->calculate_totals();
-          define( 'PIQ_TOTAL_AMOUNT', $this->PIQ_TOTAL_AMOUNT );
-          define( 'PIQ_ORDER_ID', $this->PIQ_ORDER_ID );
+          // $this->PIQ_TOTAL_AMOUNT = $order->calculate_totals();
+          // $this->PIQ_ORDER_ID = $order->calculate_totals();
+          // define( 'PIQ_TOTAL_AMOUNT', $this->PIQ_TOTAL_AMOUNT );
+          // define( 'PIQ_ORDER_ID', $this->PIQ_ORDER_ID );
 
           $template = PIQ_WC_PLUGIN_PATH . '/templates/Checkout/paymentiq-checkout.php';
           return $template;
@@ -140,7 +154,10 @@ function initPIQCheckout () {
       // Actions!
       add_action( 'woocommerce_api_' . strtolower( get_class() ), array( $this, 'paymentiqCheckoutCallback' ) );
       add_action('woocommerce_init', array( $this, 'getWC_order_details' ) );
+      add_action('woocommerce_checkout_fields', array( $this, 'disable_billing_shipping' ) );
       add_action( 'piq_co_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+
+      add_action('woocommerce_checkout_order_processed', array( $this, 'checkout_order_process_init' ) );
 
       if( is_admin() ) {
         /* Saves changes when editing in PIQ Checkout admin (WooCommerce->Settings->Payments->PaymentIQ Checkout)  */
@@ -159,13 +176,15 @@ function initPIQCheckout () {
       // add_action('woocommerce_subscription_cancelled_' . $this->id, array($this, 'subscription_cancellation'));
     }
 
-    public function updateOrderStatus ( $status ) {
-      $order = wc_get_order( $this->PIQ_ORDER_ID );
-      if (!empty($order)) {
-          $order->update_status( 'completed' );
-      }
+    function checkout_order_process_init ( $order_id ) {
+      echo $order_id;
     }
 
+    function disable_billing_shipping( $fields ){
+      $fields[ 'billing' ] = array();
+      $fields[ 'shipping' ] = array();
+      return $fields;
+    }
 
     public function getWC_order_details( $order_id ) {
       
@@ -189,8 +208,7 @@ function initPIQCheckout () {
           'redirect' => $this->get_return_url( $order )
       );
     }
-
-  }
+  } /* End of class  */
 
   /* Create a new instance of PIQCheckoutWoocommerce and then trigger its register function  */
   if( class_exists( 'PIQCheckoutWoocommerce' ) ) {
@@ -206,6 +224,10 @@ function initPIQCheckout () {
         return $methods;
     }
   }
+}
+
+function PIQ_CHECKOUT_WC() { // phpcs:ignore
+	return PIQCheckoutWoocommerce::get_instance();
 }
 
 

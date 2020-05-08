@@ -12,6 +12,7 @@ window.addEventListener('message', function (e) {
     const { eventType, payload } = e.data
     switch (eventType) {
       case '::wooCommerceSetupPIQCheckout':
+        console.log(payload)
         return setupCheckout(payload)
       default: 
         return
