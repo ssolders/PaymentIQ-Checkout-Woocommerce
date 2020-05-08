@@ -82,5 +82,5 @@ function notifyOrderStatus (status, data) {
     default:
       return
   }
-  window.postMessage(payload, '*')
+  // window.postMessage(payload, '*')
 }

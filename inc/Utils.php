@@ -39,6 +39,7 @@ function piq_create_or_update_order( $order_id = null ) {
 	$piqClass = PIQ_CHECKOUT_WC();
 	PIQ_CHECKOUT_WC()->PIQ_TOTAL_AMOUNT = $totalAmount;
 	PIQ_CHECKOUT_WC()->PIQ_ORDER_ID = $order_id;
+	PIQ_CHECKOUT_WC()->PIQ_RECEIPT_URL = $order->get_checkout_payment_url();
 	$piqClass = PIQ_CHECKOUT_WC();
 	
 	do_action( 'woocommerce_checkout_create_order', $order, array() );

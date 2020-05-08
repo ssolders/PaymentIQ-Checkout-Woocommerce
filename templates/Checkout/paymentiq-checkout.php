@@ -7,6 +7,10 @@
  * @package paymentiq-checkout
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 include_once PIQ_WC_PLUGIN_PATH . '/inc/Utils.php';
 
 wc_print_notices();
@@ -47,17 +51,17 @@ do_action( 'piq_co_wc_before_checkout_form' );
 			}
 		}, '*')
 
-		window.addEventListener('message', function (e) {
-			if (e.data && e.data.eventType) {
-				const { eventType, payload } = e.data
-				switch (eventType) {
-					case '::wooCommercePaymentSuccess':
-						console.log('GOT SUCCESS MESSAGE')
-						break
-					default:
-						return
-				}	
-			}
-		})
+		// window.addEventListener('message', function (e) {
+		// 	if (e.data && e.data.eventType) {
+		// 		const { eventType, payload } = e.data
+		// 		switch (eventType) {
+		// 			case '::wooCommercePaymentSuccess':
+		// 				console.log('GOT SUCCESS MESSAGE')
+		// 				break
+		// 			default:
+		// 				return
+		// 		}	
+		// 	}
+		// })
   </script>
 </form>

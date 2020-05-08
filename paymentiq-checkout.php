@@ -156,6 +156,7 @@ function initPIQCheckout () {
       add_action('woocommerce_init', array( $this, 'getWC_order_details' ) );
       add_action('woocommerce_checkout_fields', array( $this, 'disable_billing_shipping' ) );
       add_action( 'piq_co_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
+      add_action( 'woocommerce_order_status_processing', array( $this, 'handleOrderStatusProcessing' ) );
 
       add_action('woocommerce_checkout_order_processed', array( $this, 'checkout_order_process_init' ) );
 
@@ -176,8 +177,13 @@ function initPIQCheckout () {
       // add_action('woocommerce_subscription_cancelled_' . $this->id, array($this, 'subscription_cancellation'));
     }
 
+    function handleOrderStatusProcessing ( $order_id ) {
+      do_action( 'woocommerce_thankyou' );
+    }
+
     function checkout_order_process_init ( $order_id ) {
       echo $order_id;
+      echo $this->PIQ_RECEIPT_URL;
     }
 
     function disable_billing_shipping( $fields ){
