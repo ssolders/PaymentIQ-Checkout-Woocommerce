@@ -45,6 +45,7 @@ do_action( 'piq_co_wc_before_checkout_form' );
 			payload: {
 				merchantId: <?php getPiqMerchantId(); ?>,
 				amount: <?php getPiqTotalAmount(); ?>,
+				orderId: <?php getOrderId(); ?>,
 				attributes: {
 					orderId: <?php getOrderId(); ?>
 				}
