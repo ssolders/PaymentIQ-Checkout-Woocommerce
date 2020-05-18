@@ -7,12 +7,10 @@ window.addEventListener('load', function () {
 });
 
 window.addEventListener('message', function (e) {
-  console.log(e.data)
   if (e.data && e.data.eventType) {
     const { eventType, payload } = e.data
     switch (eventType) {
       case '::wooCommerceSetupPIQCheckout':
-        console.log(payload)
         return setupCheckout(payload)
       default: 
         return
@@ -24,6 +22,8 @@ window.addEventListener('setupPIQCheckout', function (e) {
 })
 
 function setupCheckout (payload) {
+  const orderId = payload.attributes.orderId
+
   const lookupConfig = {
     source: 'mock',
     country: 'sweden',
@@ -32,7 +32,7 @@ function setupCheckout (payload) {
     environment: 'production'
   }
   const config = {
-    "environment": "test",
+    "environment": "development",
     "userId": "PayTestSE",
     "amount": "499",
     "showAccounts": "inline",
@@ -56,31 +56,39 @@ function setupCheckout (payload) {
   new _PaymentIQCheckout('#piq-checkout', config,
   (api) => {
     api.on({
-      cashierInitLoad: () => console.log('Cashier init load'),
-      update: data => console.log('The passed in data was set', data),
-      success: data => notifyOrderStatus('success', data),
-      failure: data => console.log('Transaction failed', data),
-      isLoading: data => console.log('Data is loading', data),
-      doneLoading: data => console.log('Data has been successfully downloaded', data),
-      newProviderWindow: data => console.log('A new window / iframe has opened', data),
-      paymentMethodSelect: data => console.log('Payment method was selected', data),
-      paymentMethodPageEntered: data => console.log('New payment method page was opened', data),
-      navigate: data => console.log('Path navigation triggered', data)
+      cashierInitLoad: () => {},
+      update: data => {},
+      success: data => notifyOrderStatus('success', orderId, data),
+      failure: data => {},
+      isLoading: data => {},
+      doneLoading: data => {},
+      newProviderWindow: data => {},
+      paymentMethodSelect: data => {},
+      paymentMethodPageEntered: data => {},
+      navigate: data => {}
     });
   }
 )  
 }
 
-function notifyOrderStatus (status, data) {
+/* We need to give back control to the script in the php-code
+   We do this via a postMessage back (templates/Checkout/paymentiq-checkout.php)
+*/
+function notifyOrderStatus (status, orderId, data) {
+  console.log('notifyOrderStatus')
   let payload = {}
   switch (status) {
     case 'success':
       payload = {
-        eventType: '::wooCommercePaymentSuccess'
+        eventType: '::wooCommercePaymentSuccess',
+        payload: {
+          orderId,
+          ...data
+        }
       }
       break
     default:
       return
   }
-  // window.postMessage(payload, '*')
+  window.postMessage(payload, '*')
 }

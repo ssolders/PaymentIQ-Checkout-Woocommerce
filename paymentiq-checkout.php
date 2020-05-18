@@ -56,18 +56,28 @@ define( 'PIQ_WC_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) )
 /**
  * Check if WooCommerce is active
  **/
-if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-  add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
-}
+// if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+//   add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
+// }
 
-include_once PIQ_WC_PLUGIN_PATH . '/inc/Utils.php';
+add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
+
+
 
 function initPIQCheckout () {
+  // bow out early if we don't have WooCommerce yet
+
+  if ( ! class_exists( 'WC_Payment_Gateway' ) || class_exists( 'PIQCheckoutWoocommerce' ) ) {
+    return;
+  }
+
   /*  Initialize PaymentIQ Checkout and extend it with WC_Payment_Gateway
       After init, call the register function which is turn calls the Init class.
       Check if our Init class exists (/Inc/Init.php)
       If it does -> Start it up
   */
+
+  include_once PIQ_WC_PLUGIN_PATH . '/inc/Utils.php';
 
   class PIQCheckoutWoocommerce extends WC_Payment_Gateway {
 
@@ -87,6 +97,9 @@ function initPIQCheckout () {
       $this->PIQ_MID = $this->get_option( 'merchant' );
       $this->PIQ_TOTAL_AMOUNT = null;
       $this->PIQ_ORDER_ID = null;
+
+      /* Register base stuff - enque scripts and styles */
+      $this->register();
       
       $this->supports = Inc\Base\WooCommercePIQCheckoutSetup::registerSupports();
 
@@ -97,6 +110,8 @@ function initPIQCheckout () {
 
       // Initilize PaymentIQ Settings
       $this->initCheckoutSettings();
+
+      $this->init();
     }
 
     public static function get_instance() {
@@ -108,12 +123,21 @@ function initPIQCheckout () {
 		}
     
     
-    function register () {
+    public function register () {
       if ( class_exists( 'Inc\\Init' ) ) {
         Inc\Init::registerServices();
-
-        add_filter( 'wc_get_template', array( $this, 'overrideTemplate' ), 999, 2 );
       }
+    }
+
+    public function init () {
+      $this->initHooks();
+      add_filter( 'woocommerce_payment_gateways', array( $this, 'addPaymentIQCheckout' ) );
+      add_filter( 'wc_get_template', array( $this, 'overrideTemplate' ), 999, 2 );
+    }
+
+    public function addPaymentIQCheckout ( $methods ) {
+      $methods[] = 'PIQCheckoutWoocommerce'; // name of the main class
+        return $methods;
     }
 
     /*
@@ -123,17 +147,9 @@ function initPIQCheckout () {
     public function overrideTemplate( $template, $template_name ) {
       // $piqCheckoutTemplate = require_once( "./templates/Admin/settings.php" );
       switch ($template_name) {
-        case 'checkout/form-billing.php':
-          // $cart = WC()->cart;
-          // $checkout = WC()->checkout();
-          // $order_id = $checkout->create_order([]);
-          // $order = wc_get_order( $order_id );
-          
-          // $this->PIQ_TOTAL_AMOUNT = $order->calculate_totals();
-          // $this->PIQ_ORDER_ID = $order->calculate_totals();
-          // define( 'PIQ_TOTAL_AMOUNT', $this->PIQ_TOTAL_AMOUNT );
-          // define( 'PIQ_ORDER_ID', $this->PIQ_ORDER_ID );
-
+        case 'checkout/payment-method.php':
+          return '';
+        case 'checkout/form-checkout.php':
           $template = PIQ_WC_PLUGIN_PATH . '/templates/Checkout/paymentiq-checkout.php';
           return $template;
         default:
@@ -159,25 +175,17 @@ function initPIQCheckout () {
       add_action( 'woocommerce_order_status_processing', array( $this, 'handleOrderStatusProcessing' ) );
 
       add_action('woocommerce_checkout_order_processed', array( $this, 'checkout_order_process_init' ) );
+     
+      /* When we receive a txStatus from PIQ Checkout */
+      add_action('piq_co_handle_transaction_status_update', array( $this, 'handleTransactionStatusUpdate' ) );
 
       if( is_admin() ) {
         /* Saves changes when editing in PIQ Checkout admin (WooCommerce->Settings->Payments->PaymentIQ Checkout)  */
         add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-
-          // add_action( 'add_meta_boxes', array( $this, 'bambora_online_checkout_meta_boxes' ) );
-          // add_action( 'wp_before_admin_bar_render', array( $this, 'bambora_online_checkout_actions' ) );
-          // add_action( 'admin_notices', array( $this, 'bambora_online_checkout_admin_notices' ) );
-      //     if($this->captureonstatuscomplete === 'yes') {
-      //         add_action( 'woocommerce_order_status_completed', array( $this, 'bambora_online_checkout_order_status_completed' ) );
-      //     }
       }
-
-      // //Subscriptions
-      // add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
-      // add_action('woocommerce_subscription_cancelled_' . $this->id, array($this, 'subscription_cancellation'));
     }
 
-    function handleOrderStatusProcessing ( $order_id ) {
+    public function handleOrderStatusProcessing ( $order_id ) {
       do_action( 'woocommerce_thankyou' );
     }
 
@@ -200,44 +208,68 @@ function initPIQCheckout () {
       echo 'ASDF';
     }
 
+    public function handleTransactionStatusUpdate ( $args ) {
+      $status = $args['status'];
+      $order_id = $args['orderId'];
+
+      $payment_methods = WC()->payment_gateways->get_available_payment_gateways();
+      $result = $payment_methods[ 'paymentiq-checkout' ]->process_payment( $order_id );
+      $resultUrl = $result['redirect'];
+      wp_redirect( $resultUrl );
+      wp_safe_redirect( $resultUrl );
+      exit;
+      //$this->redirect_to_thankyou( $status, $order_id );
+    }
+
+    // public function redirect_to_thankyou( $status, $order_id ) {
+    //   // Find relevant order in Woo.
+    //   $order = wc_get_order( $order_id );
+
+    //   if ( ! $order ) {
+    //     // If no order is found, bail. @TODO Add a fallback order creation here?
+    //     wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'error' ) );
+    //     return;
+    //   }
+    //   // Confirm, redirect and exit.
+    //   WC()->cart->empty_cart();
+      
+    //   /* Do we need to do this in the plugin? Already set by PIQ */
+    //   // $order->update_status('on-hold', __( 'Awaiting PIQ payment', 'woocommerce' ));
+
+    //   $orderUrl = $order->get_checkout_order_received_url();
+    //   header( 'Location:' . $order->get_checkout_order_received_url() );
+    //   exit;
+		// }
+
     function process_payment( $order_id ) {
-      echo 'PROCESS PAYMENT';
       global $woocommerce;
       $order = new WC_Order( $order_id );
       // Mark as on-hold (we're awaiting the cheque)
-      $order->update_status('on-hold', __( 'Awaiting PIQ payment', 'woocommerce' ));
+      
+      //if ($status === 'success') {
+        //$order->update_status('on-hold', __( 'Awaiting PIQ payment', 'woocommerce' ));
+      //}
+      
+
+      $orderUrl = $order->get_checkout_order_received_url();
+      $returnUrl = $this->get_return_url( $order );
+
       // Remove cart
       $woocommerce->cart->empty_cart();
       // Return thankyou redirect
       return array(
           'result' => 'success',
-          'redirect' => $this->get_return_url( $order )
+          'redirect' => $orderUrl
       );
     }
+  
   } /* End of class  */
 
-  /* Create a new instance of PIQCheckoutWoocommerce and then trigger its register function  */
-  if( class_exists( 'PIQCheckoutWoocommerce' ) ) {
-    $piqCheckoutWoocommerce = new PIQCheckoutWoocommerce();
-    $piqCheckoutWoocommerce->register();
-    
-    define( 'PIQ_MID', $piqCheckoutWoocommerce->PIQ_MID );
+  /* Create instance of our plugin */
+  PIQCheckoutWoocommerce::get_instance();
 
-    add_filter( 'woocommerce_payment_gateways', 'addPaymentIQCheckout' );
-    $piqCheckoutWoocommerce->initHooks();
-    function addPaymentIQCheckout ( $methods ) {
-      $methods[] = 'PIQCheckoutWoocommerce'; // name of the main class
-        return $methods;
-    }
-  }
-}
+} /* End of initPIQCheckout */
 
 function PIQ_CHECKOUT_WC() { // phpcs:ignore
 	return PIQCheckoutWoocommerce::get_instance();
 }
-
-
-
-
-
-

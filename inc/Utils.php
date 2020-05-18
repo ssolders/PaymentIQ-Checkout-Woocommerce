@@ -56,7 +56,9 @@ function shouldSetupCheckout() {
 
 /* Getter functions for variables defined in paymentiq-checkout.php plugin main class  */
 function getPiqMerchantId() {
-	echo PIQ_MID;
+	$instance = PIQ_CHECKOUT_WC();
+	echo PIQ_CHECKOUT_WC()->merchant;
+	// echo PIQ_MID;
 }
 
 function getPiqTotalAmount() {
@@ -70,4 +72,24 @@ function getOrderId() {
 function updateOrderStatus ( $status ) {
   // call an action hook that main class reacts to
   do_action( 'piq_co_update_order_status', $status );
+}
+
+add_action('wp_ajax_ACTION_NAME', 'handlePiqCheckoutTxStatusNotification');
+add_action( 'wp_ajax_nopriv_ACTION_NAME', 'handlePiqCheckoutTxStatusNotification' );
+function handlePiqCheckoutTxStatusNotification() {
+	check_ajax_referer('piq_tx_status_update_nonce');
+	$status	= isset($_POST['status'])?trim($_POST['status']):"";
+	$orderId	= isset($_POST['orderId'])?trim($_POST['orderId']):"";
+
+	$args = array (
+    'status' => $status,
+    'orderId' => $orderId, // max posts
+	);
+	
+	do_action('piq_co_handle_transaction_status_update', $args);
+
+	$response	= array();
+	$response['message']	= "Successfull Request";
+	echo json_encode($response);
+	exit;
 }
