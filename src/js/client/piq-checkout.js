@@ -29,11 +29,11 @@ function setupCheckout (payload) {
     country: 'sweden',
     //identifyFields: ['email', 'zip']
     identifyProvider: 'bankId',
-    environment: 'production'
+    environment: 'development'
   }
   const config = {
     "environment": "development",
-    "userId": "PayTestSE",
+    "userId": "PayTestSES",
     "amount": "499",
     "showAccounts": "inline",
     "globalSubmit": true,
@@ -86,6 +86,7 @@ function notifyOrderStatus (status, orderId, data) {
           ...data
         }
       }
+      window.location.href = `/checkout/order-received/${orderId}`
       break
     default:
       return

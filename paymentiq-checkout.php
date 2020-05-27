@@ -56,13 +56,11 @@ define( 'PIQ_WC_PLUGIN_PATH', untrailingslashit( plugin_dir_path( __FILE__ ) ) )
 /**
  * Check if WooCommerce is active
  **/
-// if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
-//   add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
-// }
+if ( in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins', get_option( 'active_plugins' ) ) ) ) {
+  add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
+}
 
-add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
-
-
+// add_action( 'plugins_loaded', 'initPIQCheckout', 0 );
 
 function initPIQCheckout () {
   // bow out early if we don't have WooCommerce yet
@@ -141,8 +139,12 @@ function initPIQCheckout () {
     }
 
     /*
-      WooCommerce hook for when their templates are rendered. Here we can replace
+      WooCommerce hook for when their templates are rendered. Here we can override
       their with ours - so in our case we render our checkout instead of their KYC form.
+    
+      @param string $template      Template.
+	    @param string $template_name Template name.
+	    @return string
     */
     public function overrideTemplate( $template, $template_name ) {
       // $piqCheckoutTemplate = require_once( "./templates/Admin/settings.php" );
@@ -168,11 +170,8 @@ function initPIQCheckout () {
 
     public function initHooks() {
       // Actions!
-      add_action( 'woocommerce_api_' . strtolower( get_class() ), array( $this, 'paymentiqCheckoutCallback' ) );
-      add_action('woocommerce_init', array( $this, 'getWC_order_details' ) );
       add_action('woocommerce_checkout_fields', array( $this, 'disable_billing_shipping' ) );
       add_action( 'piq_co_wc_before_checkout_form', 'woocommerce_checkout_login_form', 10 );
-      add_action( 'woocommerce_order_status_processing', array( $this, 'handleOrderStatusProcessing' ) );
 
       add_action('woocommerce_checkout_order_processed', array( $this, 'checkout_order_process_init' ) );
      
@@ -185,78 +184,32 @@ function initPIQCheckout () {
       }
     }
 
-    public function handleOrderStatusProcessing ( $order_id ) {
-      do_action( 'woocommerce_thankyou' );
-    }
-
-    function checkout_order_process_init ( $order_id ) {
-      echo $order_id;
-      echo $this->PIQ_RECEIPT_URL;
-    }
-
     function disable_billing_shipping( $fields ){
       $fields[ 'billing' ] = array();
       $fields[ 'shipping' ] = array();
       return $fields;
     }
 
-    public function getWC_order_details( $order_id ) {
-      
-    }
-
-    public function paymentiqCheckoutCallback () {
-      echo 'ASDF';
-    }
-
     public function handleTransactionStatusUpdate ( $args ) {
+      ob_clean();
+      ob_start();
+
       $status = $args['status'];
       $order_id = $args['orderId'];
 
       $payment_methods = WC()->payment_gateways->get_available_payment_gateways();
       $result = $payment_methods[ 'paymentiq-checkout' ]->process_payment( $order_id );
       $resultUrl = $result['redirect'];
-      wp_redirect( $resultUrl );
-      wp_safe_redirect( $resultUrl );
-      exit;
-      //$this->redirect_to_thankyou( $status, $order_id );
+      $currentOrder = $order = new WC_Order( $order_id );
     }
-
-    // public function redirect_to_thankyou( $status, $order_id ) {
-    //   // Find relevant order in Woo.
-    //   $order = wc_get_order( $order_id );
-
-    //   if ( ! $order ) {
-    //     // If no order is found, bail. @TODO Add a fallback order creation here?
-    //     wc_add_notice( __( 'Something went wrong in the checkout process. Please contact the store.', 'error' ) );
-    //     return;
-    //   }
-    //   // Confirm, redirect and exit.
-    //   WC()->cart->empty_cart();
-      
-    //   /* Do we need to do this in the plugin? Already set by PIQ */
-    //   // $order->update_status('on-hold', __( 'Awaiting PIQ payment', 'woocommerce' ));
-
-    //   $orderUrl = $order->get_checkout_order_received_url();
-    //   header( 'Location:' . $order->get_checkout_order_received_url() );
-    //   exit;
-		// }
 
     function process_payment( $order_id ) {
       global $woocommerce;
       $order = new WC_Order( $order_id );
-      // Mark as on-hold (we're awaiting the cheque)
       
-      //if ($status === 'success') {
-        //$order->update_status('on-hold', __( 'Awaiting PIQ payment', 'woocommerce' ));
-      //}
-      
-
       $orderUrl = $order->get_checkout_order_received_url();
-      $returnUrl = $this->get_return_url( $order );
-
-      // Remove cart
       $woocommerce->cart->empty_cart();
-      // Return thankyou redirect
+
       return array(
           'result' => 'success',
           'redirect' => $orderUrl

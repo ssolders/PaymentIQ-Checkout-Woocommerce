@@ -59,39 +59,32 @@ class WooCommercePIQCheckoutSetup {
       //     'description' => 'The MD5 key is used to stamp data sent between WooCommerce and Bambora to prevent it from being tampered with. The MD5 key is optional but if used here, must be the same as in the Bambora administration.',
       //     'default' => ''
       // ),
-      'paymentwindowid' => array(
-          'title' => 'Payment Window ID',
-          'type' => 'text',
-          'description' => 'The ID of the payment window to use.',
-          'default' => '1'
-      ),
-      'instantcapture' => array(
-          'title' => 'Instant capture',
-          'type' => 'checkbox',
-          'description' => 'Capture the payments at the same time they are authorized. In some countries, this is only permitted if the consumer receives the products right away Ex. digital products.',
-          'label' => 'Enable Instant Capture',
-          'default' => 'no'
-      ),
-      'immediateredirecttoaccept' => array(
-          'title' => 'Immediate Redirect',
-          'type' => 'checkbox',
-          'description' => 'Immediately redirect your customer back to you shop after the payment completed.',
-          'label' => 'Enable Immediate redirect',
-          'default' => 'no'
-      ),
-      'addsurchargetoshipment' => array(
-          'title' => 'Add Surcharge',
-          'type' => 'checkbox',
-          'description' => 'Display surcharge amount on the order as an item',
-          'label' => 'Enable Surcharge',
-          'default' => 'no'
-      ),
-      'captureonstatuscomplete' => array(
-          'title' => 'Capture on status Completed',
-          'type' => 'checkbox',
-          'description' => 'When this is enabled the full payment will be captured when the order status changes to Completed',
-          'default' => 'no'
-      )
+    //   'paymentwindowid' => array(
+    //       'title' => 'Payment Window ID',
+    //       'type' => 'text',
+    //       'description' => 'The ID of the payment window to use.',
+    //       'default' => '1'
+    //   ),
+    //   'instantcapture' => array(
+    //       'title' => 'Instant capture',
+    //       'type' => 'checkbox',
+    //       'description' => 'Capture the payments at the same time they are authorized. In some countries, this is only permitted if the consumer receives the products right away Ex. digital products.',
+    //       'label' => 'Enable Instant Capture',
+    //       'default' => 'no'
+    //   ),
+    //   'addsurchargetoshipment' => array(
+    //       'title' => 'Add Surcharge',
+    //       'type' => 'checkbox',
+    //       'description' => 'Display surcharge amount on the order as an item',
+    //       'label' => 'Enable Surcharge',
+    //       'default' => 'no'
+    //   ),
+    //   'captureonstatuscomplete' => array(
+    //       'title' => 'Capture on status Completed',
+    //       'type' => 'checkbox',
+    //       'description' => 'When this is enabled the full payment will be captured when the order status changes to Completed',
+    //       'default' => 'no'
+    //   )
       // 'roundingmode' => array(
       //     'title' => 'Rounding mode',
       //     'type' => 'select',

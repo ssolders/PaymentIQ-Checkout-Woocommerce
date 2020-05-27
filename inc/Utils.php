@@ -23,6 +23,8 @@ function piq_create_or_update_order( $order_id = null ) {
 	$available_gateways = WC()->payment_gateways->payment_gateways();
 	$payment_method     = $available_gateways['paymentiq-checkout'];
 
+	// $session = WC()->session;
+
 	$manualOrder = array(
 		'status' => 'pending',
 		'payment_method' => $payment_method->id,
@@ -34,6 +36,28 @@ function piq_create_or_update_order( $order_id = null ) {
 	$order_id = $checkout->create_order($manualOrder);
 	$order = wc_get_order( $order_id );
 	update_post_meta($order_id, '_customer_user', get_current_user_id());
+
+
+	$order->set_billing_first_name( 'Jane' );
+	$order->set_billing_last_name( 'Doe' );
+	$order->set_billing_country( 'Sweden' );
+	$order->set_billing_address_1( 'Vasagatan 14' );
+	$order->set_billing_address_2( '' );
+	$order->set_billing_city( 'Stockholm' );
+	$order->set_billing_state( 'Stockholm' );
+	$order->set_billing_postcode( '11750' );
+	$order->set_billing_phone( '0700000000' );
+	$order->set_billing_email( 'test@example.com' );
+
+	$order->set_shipping_first_name( 'Jane' );
+	$order->set_shipping_last_name( 'Doe' );
+	$order->set_shipping_country( 'Sweden' );
+	$order->set_shipping_address_1( 'Vasagatan 14' );
+	$order->set_shipping_address_2( '' );
+	$order->set_shipping_city( 'Stockholm' );
+	$order->set_shipping_state( 'Stockholm' );
+	$order->set_shipping_postcode( '11750' );
+
 	$totalAmount = $order->calculate_totals();
 
 	$piqClass = PIQ_CHECKOUT_WC();
@@ -43,7 +67,11 @@ function piq_create_or_update_order( $order_id = null ) {
 	$piqClass = PIQ_CHECKOUT_WC();
 	
 	do_action( 'woocommerce_checkout_create_order', $order, array() );
+
+	$order->save();
+
 	do_action( 'woocommerce_checkout_update_order_meta', $order_id, array() );
+	
 }
 
 function shouldSetupCheckout() {
@@ -91,5 +119,4 @@ function handlePiqCheckoutTxStatusNotification() {
 	$response	= array();
 	$response['message']	= "Successfull Request";
 	echo json_encode($response);
-	exit;
 }
