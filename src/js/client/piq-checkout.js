@@ -29,11 +29,11 @@ function setupCheckout (payload) {
     country: 'sweden',
     //identifyFields: ['email', 'zip']
     identifyProvider: 'bankId',
-    environment: 'development'
+    environment: 'test'
   }
   const config = {
-    "environment": "development",
-    "userId": "PayTestSES",
+    "environment": "test",
+    "userId": "PayTestSE",
     "amount": "499",
     "showAccounts": "inline",
     "globalSubmit": true,
